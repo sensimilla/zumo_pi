@@ -1,0 +1,14 @@
+teleop:
+  move:
+    type: topic
+    message_type: geometry_msgs/Twist
+    topic_name: head/cmd_vel
+    axis_mappings:
+      -
+        axis: 4
+        target: angular.y
+        scale: 0.75
+      -
+        axis: 3
+        target: angular.z
+        scale: 0.75
