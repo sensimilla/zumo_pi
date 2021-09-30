@@ -57,6 +57,7 @@ add_message_files(
 add_service_files(
   FILES
   StartRanging.srv
+  StartAmg8833.srv
 )
 
 ## Generate actions in the 'action' folder
