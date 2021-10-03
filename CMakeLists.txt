@@ -58,6 +58,7 @@ add_service_files(
   FILES
   StartRanging.srv
   StartAmg8833.srv
+  GetRange.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -160,7 +161,9 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/node.py
+  scripts/amg8833_node.py 
+  scripts/servo_node.py
+  scripts/vl53l0x_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -24,7 +24,7 @@ class AMG8833DriverROSWrapper:
 
         self.rate = 10
 
-        self.set_rate(rospy.get_param("~rate", 10))
+        self.set_rate(rospy.get_param("~rate", 1))
 
         self.is_enabled = False
 
@@ -49,19 +49,25 @@ class AMG8833DriverROSWrapper:
 
     def read_amg(self, event=None):  # called from timer loop which adds event paramter
         flat_pixels = []
-        for row in self.amg.pixels:
-            for temp in row:
-                flat_pixels.append(temp)
+        try:
+            for row in self.amg.pixels:
+                for temp in row:
+                    flat_pixels.append(temp)
+            chip_temp = self.amg.temperature
+        except:
+            rospy.logerr("failed to read AMG833")
+            return
 
         amgReading = Amg8833Raw()
         amgReading.header.frame_id = rospy.get_param("~frame_id", "amg8833_link")
         amgReading.header.stamp = rospy.Time.now()
         amgReading.pixel_temps = flat_pixels
-        amgReading.chip_temp = self.amg.temperature
+        amgReading.chip_temp = chip_temp
 
         self.amgPub.publish(amgReading)
 
     def stop(self):
+        self.publish_timer.shutdown()
         rospy.loginfo("AMG833 Closed")
 
     def set_rate(self, new_rate):

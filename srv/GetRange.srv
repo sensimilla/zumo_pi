@@ -1,0 +1,4 @@
+uint8 mode
+---
+bool success   # indicate successful run of triggered service
+float32 range    # reading from VL53L0X
