@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<robot name="zumobot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="tilt_link_size_x" value="0.02" />
+    <xacro:property name="tilt_link_size_y" value="0.05" />
+    <xacro:property name="tilt_link_size_z" value="0.045" />
+
+    <link name="base_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="package://zumo_pi/urdf/zumo_base.stl" scale="-1 1 1"/>
+            </geometry>
+            <material name="Grey">
+                <color rgba="0.30 0.30 0.10 1.0"/>
+            </material>
+        </visual>
+    </link>
+    
+    <joint name="pan_joint" type="revolute">
+        <parent link="base_link"/>
+        <child link="pan_link"/>
+        <origin xyz="0 0 0.05"/>
+        <axis xyz="0 0 1" />
+        <limit effort="300" velocity="0.1" lower="-0.75" upper="0.75"/>
+        <dynamics damping="50" friction="1"/>
+    </joint>
+    
+    <link name="pan_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.01" radius="0.01"/>
+            </geometry>
+            <material name="blue">
+                <color rgba="0.00 0.24 0.70 1.0"/>
+            </material>
+        </visual>
+    </link>       
+    <joint name="tilt_joint" type="revolute">
+      <parent link="pan_link"/>
+      <child link="tilt_link"/>
+      <origin xyz="0.03 0 0.04"/>
+      <axis xyz="0 1 0" />
+      <limit effort="300" velocity="0.1" lower="-0.75" upper="0.75"/>
+      <dynamics damping="50" friction="1"/>
+    </joint>
+    <link name="tilt_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="${tilt_link_size_x / 2} 0 ${tilt_link_size_z / 2}"/>
+            <geometry>
+                <box size="${tilt_link_size_x} ${tilt_link_size_y} ${tilt_link_size_z}"/>
+            </geometry>
+            <material name="yellow">
+                <color rgba="1.00 0.90 0.40 1.0"/>
+            </material>
+        </visual>
+    </link>
+    <link name="amg8833_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="-0.01 0 0"/>
+            <geometry>
+                <box size="0.01 0.01 0.01"/>
+            </geometry>
+            <material name="yellow">
+                <color rgba="1.00 0.90 0.40 1.0"/>
+            </material>
+        </visual>
+    </link>
+    <joint name="amg8833_joint" type="fixed">
+      <parent link="tilt_link"/>
+      <child link="amg8833_link"/>
+      <origin xyz="${tilt_link_size_x + 0.015} 0 0.035"/>
+    </joint>
+    <link name="vl53l0x_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="-0.01 0 0"/>
+            <geometry>
+                <box size="0.01 0.01 0.01"/>
+            </geometry>
+            <material name="yellow">
+                <color rgba="1.00 0.90 0.40 1.0"/>
+            </material>
+        </visual>
+    </link>
+    <joint name="vl53l0x_joint" type="fixed">
+      <parent link="tilt_link"/>
+      <child link="vl53l0x_link"/>
+      <origin xyz="${tilt_link_size_x + 0.015} 0 0.015"/>
+    </joint>                
+</robot>
+
