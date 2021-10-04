@@ -1,0 +1,15 @@
+<launch>
+   <node name="zumo_servos" pkg="zumo_pi" type="servo_node.py" output="screen" respawn="false" />
+   <node name="vl53l0x" pkg="zumo_pi" type="vl53l0x_node.py" output="screen" respawn="true">
+       <param name="autostart" value="True" />
+       <param name="mode" value="2" />
+   </node>
+   <node name="amg8833" pkg="zumo_pi" type="amg8833_node.py" output="screen" respawn="true">
+         <param name="rate" value="1" />
+         <param name="autostart" value="False" />
+   </node>
+      <node name="zumobot" pkg="ros_arduino_python" type="arduino_node.py" output="screen" respawn="false">
+      <rosparam file="$(find ros_arduino_python)/config/zumo_arduino_params.yaml" command="load" />
+   </node>
+</launch>
+
