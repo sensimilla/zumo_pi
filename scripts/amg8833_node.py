@@ -23,7 +23,7 @@ class AMG8833DriverROSWrapper:
         rospy.Service("~start_amg833", StartAmg8833, self.callback_start_amg)
         rospy.Service("~stop_amg833", Trigger, self.callback_stop_amg)
 
-        autostart = rospy.get_param("~auto_start", True)
+        autostart = rospy.get_param("~autostart", True)
 
         self.rate = 10
 

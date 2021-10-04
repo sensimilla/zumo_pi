@@ -31,7 +31,7 @@ class VL53L0XDriverROSWrapper:
         rospy.Service("~start_ranging", StartRanging, self.callback_start_ranging)
         rospy.Service("~get_range", GetRange, self.callback_ranging_single)
 
-        autostart = rospy.get_param("~auto_start", True)
+        autostart = rospy.get_param("~autostart", True)
 
         mode = rospy.get_param("~mode", StartRangingRequest.VL53L0X_BEST_ACCURACY_MODE)
 
