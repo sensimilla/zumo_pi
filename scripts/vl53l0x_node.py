@@ -13,15 +13,19 @@ from zumo_pi.srv._StartRanging import StartRanging, StartRangingResponse, \
 import time
 import math
 import VL53L0X
+import threading
 
 
 class VL53L0XDriverROSWrapper:
 
     def __init__(self):
+        self.lock = threading.Lock()
+        self.rangingThread = None
+
         self.tof = VL53L0X.VL53L0X()
         self.tof.open()
 
-        self.rangePub = rospy.Publisher('~vl53l0x', Range, queue_size=5)
+        self.rangePub = rospy.Publisher('~vl53l0x', Range, queue_size=1)
 
         rospy.Service("~stop_ranging", Trigger, self.callback_stop_ranging)
         rospy.Service("~start_ranging", StartRanging, self.callback_start_ranging)
@@ -31,56 +35,66 @@ class VL53L0XDriverROSWrapper:
 
         mode = rospy.get_param("~mode", StartRangingRequest.VL53L0X_BEST_ACCURACY_MODE)
 
-        self.publish_timer = None
+        #self.publish_timer = None
 
         #  read and publish rate
         #  0 = use rate based on mode timings
         self.rate = rospy.get_param("~rate", 0)
 
         if autostart:
+            rospy.loginfo("Autostarting VL53L0X Time-of-Flight Ranging Sensor")
             self.start_ranging(mode)
 
     def start_ranging(self,mode):
         # instantiate reponse part of ROS service definition
         res = StartRangingResponse()
+        with self.lock: 
+            self.tof.start_ranging(mode)
 
-        self.tof.start_ranging(mode)
+            if self.rate == 0:
+                timing = self.tof.get_timing()
+                if (timing < 20000):
+                    timing = 20000
+                # get sensor timing info from microseconds
+                period = rospy.Duration(timing / 1e+6)
+            else:
+                period = rospy.Duration(1.0/self.rate)
 
-        if self.rate == 0:
-            timing = self.tof.get_timing()
-            if (timing < 20000):
-                timing = 20000
-            # get sensor timing info from microseconds
-            period = rospy.Duration(timing / 1e+6)
-        else:
-            period = rospy.Duration(1.0/self.rate)
-
-        self.publish_timer = rospy.Timer(period, self.read_range)
-        rospy.loginfo("starting ranging in mode " + repr(mode))
-        rospy.loginfo("Polling at " + repr(period.nsecs / 1e+9) + "s")
-        rospy.loginfo("Target rate " + repr(1 / period.nsecs * 1e+9) + " Hz" )
+            self.rangingThread = rospy.Timer(period, self.read_range)
+            rospy.loginfo("starting ranging in mode " + repr(mode))
+            rospy.loginfo("Polling at " + repr(period.nsecs / 1e+9) + "s")
+            rospy.loginfo("Target rate " + repr(1 / period.nsecs * 1e+9) + " Hz" )
 
     def stop_ranging(self):
         rospy.loginfo("VL53L0X Ranging Stopped")
-        self.publish_timer.shutdown()
-        self.tof.stop_ranging()
+        self.rangingThread.shutdown()
+        # leave the tof ranging otherwise oneshot is unreliable
+        # doesn't seem to use much/any? CPU on host
+        
+
+        #self.tof.stop_ranging()
 
     def read_range_single(self, mode):
-        self.tof.start_ranging(mode)
-        timing = self.tof.get_timing()
-        if (timing < 20000):
-            timing = 20000
+        rospy.loginfo("VL53L0X single shot triggered")
+        #self.tof.start_ranging(mode)
+        #timing = self.tof.get_timing()
+        #if (timing < 20000):
+        #    timing = 20000
             # get sensor timing info from microseconds
-        period = rospy.Duration(timing / 1e+6)
-        rospy.sleep(period)
-        range = self.read_range()
-        self.stop_ranging()
+        #period = rospy.Duration(timing / 1e+6)
+        #rospy.sleep(period)
+        with self.lock:
+           range = self.read_range()
+        #self.stop_ranging()
         return range
 
 
     def read_range(self, event=None):  # called from timer loop which adds event paramter
-        #time_error = event.current_real - event.current_expected
-        #print(time_error / 1e+6)
+        time_error = event.current_real - event.current_expected
+        error_ms = time_error.nsecs / 1e+6  #  milliseconds
+        if error_ms > 100:
+            rospy.logwarn("high thread latency detected: %ims" % error_ms)
+
         reading = Range()
         reading.header.frame_id = rospy.get_param("~frame_id", "vl53l0x_link")
         reading.header.stamp = rospy.Time.now()
@@ -89,13 +103,15 @@ class VL53L0XDriverROSWrapper:
         reading.min_range = rospy.get_param("~min_range", 0.005)
         reading.max_range = rospy.get_param("~max_range", 2.0)
 
-        reading.range = self.tof.get_distance() / 1000.0
+        with self.lock:
+            reading.range = self.tof.get_distance() / 1000.0
 
         self.rangePub.publish(reading)
         return reading.range
 
     def stop(self):
-        self.publish_timer.shutdown()
+        self.rangingThread.shutdown()
+        self.tof.stop_ranging()
         self.tof.close()
         rospy.loginfo("VL53L0X Closed")
 
