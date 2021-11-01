@@ -90,10 +90,14 @@ class VL53L0XDriverROSWrapper:
 
 
     def read_range(self, event=None):  # called from timer loop which adds event paramter
-        time_error = event.current_real - event.current_expected
-        error_ms = time_error.nsecs / 1e+6  #  milliseconds
-        if error_ms > 100:
-            rospy.logwarn("high thread latency detected: %ims" % error_ms)
+        # latency detecion
+        #  works for a bit but then shows every loop as late
+        #  performance issue or normal ??  
+        #time_error = event.current_real - event.current_expected
+        #error_ms = time_error.nsecs / 1e+6  #  milliseconds
+        #if error_ms > 100:
+            #rospy.logwarn("high thread latency detected: %ims" % error_ms)
+ 
 
         reading = Range()
         reading.header.frame_id = rospy.get_param("~frame_id", "vl53l0x_link")
