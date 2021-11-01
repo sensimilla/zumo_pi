@@ -4,7 +4,7 @@
        <param name="autostart" value="True" />
        <param name="mode" value="2" />
    </node>
-   <node name="amg8833" pkg="zumo_pi" type="amg8833_node.py" output="screen" respawn="true">
+   <node name="amg8833" pkg="zumo_pi" type="amg8833_node.py" output="screen" respawn="false">
          <param name="rate" value="1" />
          <param name="autostart" value="False" />
    </node>
