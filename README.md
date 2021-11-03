@@ -26,9 +26,16 @@ ExecStart=/home/pi/local/bin/servod --p1pins=11,12 --idle-timeout=1000
 WantedBy=multi-user.target
 
 TOF rnage sensor modes
+
 Maximum throuhput on zero w 2 is 20-25 Hz
+
 VL53L0X_GOOD_ACCURACY_MODE      0    Good Accuracy mode - 30 Hz
+
 VL53L0X_BETTER_ACCURACY_MODE    1    Better Accuracy mode - 15Hz
+
 VL53L0X_BEST_ACCURACY_MODE      2    Best Accuracy mode - 5Hz
+
 VL53L0X_LONG_RANGE_MODE         3    Longe Range mode - rubbish
+
 VL53L0X_HIGH_SPEED_MODE         4    High Speed mode - 50 Hz 
+
