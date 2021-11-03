@@ -1,0 +1,9 @@
+[Unit]
+Description=ServoBlaster daemon
+
+[Service]
+Type=forking
+ExecStart=/home/pi/local/bin/servod --p1pins=11,12 --idle-timeout=1000`
+
+[Install]
+WantedBy=multi-user.target
