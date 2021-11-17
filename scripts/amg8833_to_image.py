@@ -6,6 +6,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2 as cv
 import numpy as np
+from colour import Color
  
 img = np.zeros((64,64),dtype=np.uint8)
 
@@ -34,10 +35,10 @@ if __name__ == '__main__':
     rospy.init_node('amg8833_to_image', anonymous=False)
 
     #  gets raw pixel temperature from robot as float list
-    sub = rospy.Subscriber("zumo_pi/amg8833_raw", Amg8833Raw, callback)
+    sub = rospy.Subscriber("/amg8833/amg8833_raw", Amg8833Raw, callback)
 
     #  publish the processed image
-    pub = rospy.Publisher("zumo_pi/amg8833", Image, queue_size=1)
+    pub = rospy.Publisher("/amg8833/amg8833_image", Image, queue_size=1)
 
     # max sensor max  is 10Hz
     rate=rospy.Rate(10)
